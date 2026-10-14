@@ -23,8 +23,7 @@ export class MenuService {
 
   // Menu items
   async getMenuItems(filters?: { categoryId?: string; availableOnly?: boolean; search?: string }): Promise<MenuItem[]> {
-    let query: FirebaseFirestore.Query = this.menuCollection;
-
+    let query = this.menuCollection as unknown as FirebaseFirestore.Query;
     if (filters?.categoryId && filters.categoryId !== 'all') {
       query = query.where('categoryId', '==', filters.categoryId);
     }

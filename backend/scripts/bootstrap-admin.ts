@@ -1,5 +1,5 @@
 import { db, auth } from '../src/config/firebase';
-
+type MergeOptions = { merge: boolean };
 async function bootstrapAdmin() {
   const email = process.argv[2] || process.env.BOOTSTRAP_ADMIN_EMAIL;
 
@@ -26,18 +26,24 @@ async function bootstrapAdmin() {
       uid = `admin-${email.split('@')[0]}`;
     }
 
-    const now = new Date().toISOString();
-    await db.collection('users').doc(uid).set(
-      {
-        uid,
-        email,
-        displayName,
-        role: 'admin',
-        active: true,
-        updatedAt: now,
-      },
-      { merge: true }
-    );
+    
+const now = new Date().toISOString();
+const userRef = db.collection('users').doc(uid);
+
+await (userRef as {
+  set: (data: any, options?: { merge: boolean }) => Promise<void>;
+}).set(
+  {
+    uid,
+    email,
+    displayName,
+    role: 'admin',
+    active: true,
+    updatedAt: now,
+  },
+  { merge: true }
+);
+
 
     // Also attempt to set custom user claims if Firebase Admin is connected
     try {

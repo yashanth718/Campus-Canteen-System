@@ -142,7 +142,7 @@ export class OrderService {
     endDate?: string;
     limit?: number;
   }): Promise<Order[]> {
-    let query: FirebaseFirestore.Query = this.ordersCollection;
+    let query = this.ordersCollection as unknown as FirebaseFirestore.Query;
 
     if (filters?.status && filters.status !== ('all' as any)) {
       query = query.where('status', '==', filters.status);

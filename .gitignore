@@ -9,3 +9,5 @@ serviceAccountKey.json
 .DS_Store
 coverage/
 .firebase/
+/backend/campus-cloud-canteen-firebase-adminsdk*.json
+/.vscode
