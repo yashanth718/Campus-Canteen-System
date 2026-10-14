@@ -1,0 +1,16 @@
+{
+  "name": "online-canteen-ordering-system",
+  "version": "1.0.0",
+  "description": "Cloud-Based Online Canteen Ordering System for College Campus",
+  "scripts": {
+    "dev:frontend": "npm --prefix frontend run dev",
+    "dev:backend": "npm --prefix backend run dev",
+    "build:frontend": "npm --prefix frontend run build",
+    "build:backend": "npm --prefix backend run build",
+    "build": "npm run build:frontend && npm run build:backend",
+    "test:backend": "npm --prefix backend test"
+  },
+  "keywords": ["canteen", "cloud-computing", "react", "express", "firebase", "firestore"],
+  "author": "Engineering Team",
+  "license": "ISC"
+}

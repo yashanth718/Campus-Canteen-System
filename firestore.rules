@@ -1,0 +1,116 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && (
+        request.auth.token.role == 'admin' || 
+        getUserData().role == 'admin'
+      );
+    }
+
+    function isStaff() {
+      return isAuthenticated() && (
+        request.auth.token.role == 'staff' || 
+        getUserData().role == 'staff' ||
+        isAdmin()
+      );
+    }
+
+    // 1. Users collection
+    match /users/{userId} {
+      // Any authenticated user can read their own profile, staff/admin can read all
+      allow read: if isOwner(userId) || isStaff();
+      
+      // New user registration defaults to role: student and cannot self-assign staff/admin
+      allow create: if isAuthenticated() && request.auth.uid == userId && (
+        !request.resource.data.keys().hasAny(['role']) || request.resource.data.role == 'student'
+      );
+      
+      // Students can update only benign profile fields like displayName or fcmTokens, never role or active
+      allow update: if isOwner(userId) && (
+        !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'active', 'email'])
+      ) || isAdmin();
+      
+      allow delete: if isAdmin();
+    }
+
+    // 2. Categories collection
+    match /categories/{categoryId} {
+      // Menu categories are readable by everyone
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // 3. Menu Items collection
+    match /menuItems/{itemId} {
+      // Menu items are readable by everyone
+      allow read: if true;
+      // Only admins can create, update, or delete menu items
+      allow write: if isAdmin();
+    }
+
+    // 4. Orders collection
+    match /orders/{orderId} {
+      // Student reads only their own orders; staff and admin can read all orders
+      allow read: if isAuthenticated() && (
+        resource.data.studentId == request.auth.uid || isStaff()
+      );
+      
+      // Client-side direct creation is prohibited or strictly limited because
+      // server-side Express API validates pricing, inventory, and payment.
+      // If frontend creates directly via fallback, status must be 'placed' and studentId must match
+      allow create: if isAuthenticated() && request.resource.data.studentId == request.auth.uid && (
+        request.resource.data.status == 'placed'
+      );
+
+      // Only staff/admin can update status, student cannot modify status or total amount
+      allow update: if isStaff();
+      allow delete: if isAdmin();
+    }
+
+    // 5. Notifications collection
+    match /notifications/{notificationId} {
+      // Student can only read their own notifications
+      allow read: if isAuthenticated() && resource.data.recipientId == request.auth.uid;
+      
+      // Students can only mark their own notification as read, without altering message or recipient
+      allow update: if isAuthenticated() && resource.data.recipientId == request.auth.uid && (
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read', 'readAt'])
+      );
+
+      // Notifications are created by server-side Firebase Admin SDK or admin
+      allow create: if isStaff();
+      allow delete: if isAdmin();
+    }
+
+    // 6. Payments collection
+    match /payments/{paymentId} {
+      // Student can read their own payment records, staff/admin can read all
+      allow read: if isAuthenticated() && (
+        resource.data.studentId == request.auth.uid || isStaff()
+      );
+      // Payment writes must come from trusted server-side Admin SDK
+      allow write: if isAdmin();
+    }
+
+    // 7. Analytics precomputed daily aggregates
+    match /analyticsDaily/{date} {
+      allow read: if isAdmin();
+      allow write: if isAdmin();
+    }
+  }
+}
