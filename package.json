@@ -3,14 +3,28 @@
   "version": "1.0.0",
   "description": "Cloud-Based Online Canteen Ordering System for College Campus",
   "scripts": {
+    "dev": "concurrently -n \"backend,frontend\" -c \"blue,green\" \"npm run dev:backend\" \"npm run dev:frontend\"",
     "dev:frontend": "npm --prefix frontend run dev",
     "dev:backend": "npm --prefix backend run dev",
     "build:frontend": "npm --prefix frontend run build",
     "build:backend": "npm --prefix backend run build",
     "build": "npm run build:frontend && npm run build:backend",
-    "test:backend": "npm --prefix backend test"
+    "test:backend": "npm --prefix backend test",
+    "test": "npm run test:backend",
+    "seed": "npm --prefix backend run seed",
+    "bootstrap-admin": "npm --prefix backend run bootstrap-admin"
   },
-  "keywords": ["canteen", "cloud-computing", "react", "express", "firebase", "firestore"],
+  "keywords": [
+    "canteen",
+    "cloud-computing",
+    "react",
+    "express",
+    "firebase",
+    "firestore"
+  ],
   "author": "Engineering Team",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
 }
