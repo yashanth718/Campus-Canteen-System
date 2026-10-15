@@ -25,20 +25,20 @@ export async function verifyAuthToken(req: Request, res: Response, next: NextFun
   const token = authHeader.split('Bearer ')[1].trim();
 
   // Test / Dev Mode shortcuts for automated testing or rapid evaluation without live credentials
-  if (process.env.NODE_ENV !== 'production' && token.startsWith('dev-')) {
-    if (token === 'dev-admin-token') {
-      req.user = { uid: 'dev-admin-1', email: 'admin@canteen.edu', displayName: 'Canteen Admin', role: 'admin' };
-      return next();
-    }
-    if (token === 'dev-staff-token') {
-      req.user = { uid: 'dev-staff-1', email: 'staff@canteen.edu', displayName: 'Kitchen Staff', role: 'staff' };
-      return next();
-    }
-    if (token === 'dev-student-token') {
-      req.user = { uid: 'dev-student-1', email: 'student@canteen.edu', displayName: 'Demo Student', role: 'student' };
-      return next();
-    }
-  }
+  // if (process.env.NODE_ENV !== 'production' && token.startsWith('dev-')) {
+  //   if (token === 'dev-admin-token') {
+  //     req.user = { uid: 'dev-admin-1', email: 'admin@canteen.edu', displayName: 'Canteen Admin', role: 'admin' };
+  //     return next();
+  //   }
+  //   if (token === 'dev-staff-token') {
+  //     req.user = { uid: 'dev-staff-1', email: 'staff@canteen.edu', displayName: 'Kitchen Staff', role: 'staff' };
+  //     return next();
+  //   }
+  //   if (token === 'dev-student-token') {
+  //     req.user = { uid: 'dev-student-1', email: 'student@canteen.edu', displayName: 'Demo Student', role: 'student' };
+  //     return next();
+  //   }
+  // }
 
   try {
     const decodedToken = await auth.verifyIdToken(token);
